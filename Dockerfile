@@ -101,3 +101,5 @@ RUN make qt-faststart
 RUN cp qt-faststart /usr/bin/
 
 RUN ldconfig
+
+WORKDIR /videos
