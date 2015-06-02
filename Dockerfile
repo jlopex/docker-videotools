@@ -9,9 +9,7 @@ RUN apt-get install -y \
       build-essential \
       bzip2 \
       curl \
-      #ffmpeg \
       handbrake-cli \
-      #libavdevice-ffmpeg-dev \
       libdvdread-dev \
       libfreetype6-dev \
       libgsm1-dev \
@@ -21,8 +19,6 @@ RUN apt-get install -y \
       libogg-dev \
       libopencore-amrnb-dev \
       libopencore-amrwb-dev \
-      #libpostproc-dev \
-      #libpostproc-ffmpeg-dev \
       libsdl1.2-dev \
       libspeex-dev \
       libtheora-dev \
@@ -33,7 +29,6 @@ RUN apt-get install -y \
       libz-dev \
       melt \
       mplayer \
-      #x264 \
       yasm \
       zlib1g-dev \
       && rm -rf /usr/share/doc/* \
