@@ -100,22 +100,4 @@ WORKDIR /usr/src/ffmpeg-2.6.3/tools
 RUN make qt-faststart
 RUN cp qt-faststart /usr/bin/
 
-#WORKDIR /usr/src
-#RUN curl -L https://bitbucket.org/france/transcode-tcforge/downloads/transcode-1.1.7.tar.bz2 | tar xvj
-#WORKDIR /usr/src/transcode-1.1.7
-#RUN ./configure \
-#      --enable-libpostproc \
-#      --enable-freetype2 \
-#      --enable-lame \
-#      --enable-xvid \
-#      --enable-x264 \
-#      --enable-ogg \
-#      --enable-vorbis \
-#      --enable-theora \
-#      --enable-faac \
-#      --enable-mjpegtools \
-#      --enable-libjpeg
-#RUN make
-#RUN make install
-
 RUN ldconfig
