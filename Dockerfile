@@ -8,7 +8,9 @@ RUN apt-get update
 RUN apt-get install -y \
       build-essential \
       bzip2 \
+      cmake \
       curl \
+      git \
       handbrake-cli \
       libdvdread-dev \
       libfreetype6-dev \
@@ -66,6 +68,14 @@ RUN make
 RUN make install
 
 WORKDIR /usr/src
+RUN git clone https://github.com/georgmartius/vid.stab
+WORKDIR /usr/src/vid.stab
+RUN git checkout release-0.98b
+RUN cmake .
+RUN make
+RUN make install
+
+WORKDIR /usr/src
 RUN curl -L http://ffmpeg.org/releases/ffmpeg-2.6.3.tar.bz2 | tar xvj
 WORKDIR /usr/src/ffmpeg-2.6.3
 RUN ./configure \
@@ -79,6 +89,7 @@ RUN ./configure \
       --enable-libopencore-amrnb \
       --enable-libopencore-amrwb \
       --enable-libtheora \
+      --enable-libvidstab \
       --enable-libvorbis \
       --enable-libvpx \
       --enable-libx264 \
