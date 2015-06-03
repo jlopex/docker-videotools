@@ -1,11 +1,6 @@
 FROM ubuntu:15.04
 
-# https://www.vimp.com/en/web/faq-installation/items/how-to-install-the-transcoding-tools-on-ubuntu-1404.html
-
-#RUN echo "deb http://archive.ubuntu.com/ubuntu/ vivid-security multiverse" >> /etc/apt/sources.list
-#RUN apt-get update && apt-get install -y \
-RUN apt-get update
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
       build-essential \
       bzip2 \
       cmake \
