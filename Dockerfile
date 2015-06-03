@@ -1,12 +1,14 @@
 FROM ubuntu:15.04
 
 RUN apt-get update && apt-get install -y \
+      dh-autoreconf \
       build-essential \
       bzip2 \
       cmake \
       curl \
       git \
       handbrake-cli \
+      libav-tools \
       libdvdread-dev \
       libfreetype6-dev \
       libgsm1-dev \
@@ -71,6 +73,15 @@ RUN make
 RUN make install
 
 WORKDIR /usr/src
+RUN git clone https://github.com/mstorsjo/fdk-aac.git
+WORKDIR /usr/src/fdk-aac
+RUN git checkout v0.1.4
+RUN autoreconf -fiv
+RUN ./configure --enable-shared --enable-pic
+RUN make
+RUN make install
+
+WORKDIR /usr/src
 RUN curl -L http://ffmpeg.org/releases/ffmpeg-2.6.3.tar.bz2 | tar xvj
 WORKDIR /usr/src/ffmpeg-2.6.3
 RUN ./configure \
@@ -83,6 +94,7 @@ RUN ./configure \
       --enable-libmp3lame \
       --enable-libopencore-amrnb \
       --enable-libopencore-amrwb \
+      --enable-libfdk-aac \
       --enable-libtheora \
       --enable-libvidstab \
       --enable-libvorbis \
