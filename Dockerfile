@@ -1,119 +1,72 @@
-FROM ubuntu:15.04
+FROM ubuntu:16.04
 
 RUN apt-get update && apt-get install -y \
-      dh-autoreconf \
-      build-essential \
-      bzip2 \
-      cmake \
-      curl \
-      git \
-      handbrake-cli \
-      libav-tools \
-      libdvdread-dev \
-      libfreetype6-dev \
-      libgsm1-dev \
-      libjpeg-dev \
-      libmjpegtools-dev \
-      libmp3lame-dev \
-      libogg-dev \
-      libopencore-amrnb-dev \
-      libopencore-amrwb-dev \
-      libsdl1.2-dev \
-      libspeex-dev \
-      libtheora-dev \
-      libvorbis-dev \
-      libx264-dev \
-      libxvidcore-dev \
-      libxvidcore4 \
-      libz-dev \
-      melt \
-      mplayer \
-      yasm \
-      zlib1g-dev \
+      autoconf automake build-essential checkinstall git mercurial cmake yasm libass-dev \
+      libgpac-dev libjack-jackd2-dev libmp3lame-dev libopencore-amrnb-dev \
+      libopencore-amrwb-dev libsdl1.2-dev libspeex-dev libtheora-dev libtool libva-dev libvdpau-dev \
+      libvorbis-dev libxext-dev libxfixes-dev pkg-config texi2html zlib1g-dev \
+      libfreetype6-dev curl bzip2 wget sox libmms0\
       && rm -rf /usr/share/doc/* \
       && rm -rf /usr/share/info/* \
       && rm -rf /tmp/* \
       && rm -rf /var/tmp/*
 
+# TODO: WORKDIR maybe should be a tmpdir
+# Mediainfo
+WORKDIR /usr/src
+RUN wget https://mediaarea.net/download/binary/libzen0/0.4.35/libzen0v5_0.4.35-1_amd64.xUbuntu_17.04.deb && dpkg -i libzen0v5_0.4.35-1_amd64.xUbuntu_17.04.deb && rm -f libzen0v5_0.4.35-1_amd64.xUbuntu_17.04.deb
+RUN wget https://mediaarea.net/download/binary/libmediainfo0/0.7.95/libmediainfo0v5_0.7.95-1_amd64.xUbuntu_17.04.deb && dpkg -i libmediainfo0v5_0.7.95-1_amd64.xUbuntu_17.04.deb && rm -f libmediainfo0v5_0.7.95-1_amd64.xUbuntu_17.04.deb
+RUN wget https://mediaarea.net/download/binary/mediainfo/0.7.95/mediainfo_0.7.95-1_amd64.xUbuntu_17.04.deb && dpkg -i mediainfo_0.7.95-1_amd64.xUbuntu_17.04.deb && rm -f mediainfo_0.7.95-1_amd64.xUbuntu_17.04.deb
+
 # x264
 WORKDIR /usr/src
-RUN curl -L ftp://ftp.videolan.org/pub/videolan/x264/snapshots/last_stable_x264.tar.bz2 | tar xvj
-WORKDIR /usr/src/x264-snapshot-20141218-2245-stable
+RUN git clone -b stable git://git.videolan.org/x264.git
+WORKDIR /usr/src/x264
 RUN ./configure --prefix=/usr --enable-shared --enable-pic
-RUN make
+RUN make -j"$(nproc)"
 RUN make install
 
-# faac
+# x265
 WORKDIR /usr/src
-RUN curl -L http://downloads.sourceforge.net/faac/faac-1.28.tar.bz2 |tar xvj
-WORKDIR /usr/src/faac-1.28
-RUN grep -v strcasestr common/mp4v2/mpeg4ip.h > tmp.h && mv tmp.h common/mp4v2/mpeg4ip.h
-RUN ./configure --prefix=/usr
-RUN make
-RUN make install
-
-# faad
-WORKDIR /usr/src
-RUN curl -L http://downloads.sourceforge.net/faac/faad2-2.7.tar.bz2 |tar xvj
-WORKDIR /usr/src/faad2-2.7
-RUN ./configure --prefix=/usr
-RUN make
-RUN make install
-
-# libvpx
-WORKDIR /usr/src
-RUN curl -L http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2 | tar xvj
-WORKDIR /usr/src/libvpx-v1.3.0
-RUN ./configure --prefix=/usr --enable-shared --enable-pic
-RUN make
-RUN make install
-
-# vid.stab filter
-WORKDIR /usr/src
-RUN git clone https://github.com/georgmartius/vid.stab
-WORKDIR /usr/src/vid.stab
-RUN git checkout release-0.98b
-RUN cmake .
-RUN make
+RUN hg clone https://bitbucket.org/multicoreware/x265 -r "stable"
+WORKDIR /usr/src/x265/build/linux
+RUN sh multilib.sh
+WORKDIR /usr/src/x265/build/linux/8bit
 RUN make install
 
 # fdk-acc (non free)
 WORKDIR /usr/src
-RUN git clone https://github.com/mstorsjo/fdk-aac.git
+RUN git clone --depth 1 git://github.com/mstorsjo/fdk-aac.git
 WORKDIR /usr/src/fdk-aac
-RUN git checkout v0.1.4
 RUN autoreconf -fiv
 RUN ./configure --enable-shared --enable-pic
-RUN make
+RUN make -j"$(nproc)"
 RUN make install
 
 # ffmpeg
 WORKDIR /usr/src
-RUN curl -L http://ffmpeg.org/releases/ffmpeg-2.6.3.tar.bz2 | tar xvj
-WORKDIR /usr/src/ffmpeg-2.6.3
-RUN ./configure \
-      --enable-gpl \
-      --enable-version3 \
-      --enable-shared \
-      --enable-nonfree \
-      --enable-postproc \
-      --enable-libfaac \
-      --enable-libmp3lame \
-      --enable-libopencore-amrnb \
-      --enable-libopencore-amrwb \
-      --enable-libfdk-aac \
-      --enable-libtheora \
-      --enable-libvidstab \
-      --enable-libvorbis \
-      --enable-libvpx \
-      --enable-libx264 \
-      --enable-libxvid
-RUN make
-RUN make install
-WORKDIR /usr/src/ffmpeg-2.6.3/tools
-RUN make qt-faststart
-RUN cp qt-faststart /usr/bin/
+RUN git clone git://source.ffmpeg.org/ffmpeg 
+WORKDIR /usr/src/ffmpeg
+RUN BRANCH=`git tag -l 'n*' | sed '/dev/d' | tail -n 1)` && git checkout ${BRANCH}
 
+RUN ./configure \
+     --extra-libs="-ldl" --enable-gpl --enable-libass \
+     --enable-libfdk-aac --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb \
+     --enable-libspeex --enable-libtheora --enable-libvorbis \
+     --enable-libx264 --enable-libx265 --enable-libfreetype --enable-nonfree --enable-version3
+RUN make -j"$(nproc)"
+RUN make install
+RUN make distclean
 RUN ldconfig
+
+# DMG
+#
+#
+#
+#
+
+## cleanup
+RUN apt-get purge -y && apt-get autoremove -y && apt-get clean -y && ffmpeg -buildconf
+
 
 WORKDIR /videos
